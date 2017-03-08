@@ -6,11 +6,20 @@ package com.wangw.m3u8fortswrite;
 
 public class TsWirte {
 
+    public static final int FRAMETYPE_SPS = 1001;
+    public static final int FRAMETYPE_PPS = 1002;
+    public static final int FRAMETYPE_I = 1003;
+    public static final int FRAMETYPE_P = 1004;
+
     static {
         System.loadLibrary("tswirte");
     }
 
     public native static String helloWord();
+
+    public native static void addH264Data(byte[] inputBuffer,int length,int frameType,long ts,TSFileBuffer outPutBuffer);
+
+    public native static void AddAACData(byte[] inputBuffer,int length,int samplerate,int channum,long ts);
 
 
 }

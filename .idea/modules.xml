@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/M3u8ForTsWrite.iml" filepath="$PROJECT_DIR$/M3u8ForTsWrite.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mediacodecdemo/mediacodecdemo.iml" filepath="$PROJECT_DIR$/mediacodecdemo/mediacodecdemo.iml" />
     </modules>
   </component>
 </project>

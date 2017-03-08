@@ -10,6 +10,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include "tswriter.h"
+#include "Log.h"
 
 static uint8_t flv_mpegts_header[] = {
     
@@ -148,7 +149,7 @@ static uint8_t* flv_mpegts_write_pts(uint8_t *p, uint32_t fb, int64_t pts)
 
 int flv_mpegts_write_frame(TSFileBuffer &file, flv_mpegts_frame_t *f, str_buf_t *b, int64_t tsbase)
 {
-    printf("flv_mpegts_write_frame pid %d payloadsize %d pts %lld tsbase %lld\n", 
+    LOG("flv_mpegts_write_frame pid %d payloadsize %d pts %lld tsbase %lld\n",
            f->pid, (int)(b->last - b->pos), f->pts, tsbase);
     
     f->pts = f->pts - tsbase + FLV_HLS_DELAY * 2;
@@ -188,7 +189,7 @@ int flv_mpegts_write_frame(TSFileBuffer &file, flv_mpegts_frame_t *f, str_buf_t 
                 *p++ = 0x50; /* random access + PCR */
                 
                 // fix this, the file pcr start from 0 !!
-                printf("writing pcr %lld\n", (f->dts - FLV_HLS_DELAY) * 300);
+                LOG("writing pcr %lld\n", (f->dts - FLV_HLS_DELAY) * 300);
                 p = flv_mpegts_write_pcr(p, (f->dts - FLV_HLS_DELAY) * 300);
                 
                 // in fact, the pcr can be set to 0 in all time, the only problem will be that VLC can't seek
@@ -292,7 +293,7 @@ TSWriter::~TSWriter()
 void TSWriter::AddH264Data(const uint8_t *data, int length, H264FrameType ftype, 
                                      int64_t ts, TSFileBuffer &tsfile)
 {
-    printf("AddH264Data ftype %d, length %d, ts %lld\n", ftype, length, ts);
+    LOG("AddH264Data ftype %d, length %d, ts %lld\n", ftype, length, ts);
     memset(&tsfile, 0, sizeof(tsfile));
     
     if (ftype == H264FrameType::SPS || ftype == H264FrameType::PPS) {
@@ -352,7 +353,7 @@ void TSWriter::AddH264Data(const uint8_t *data, int length, H264FrameType ftype,
         
         if (_baseTS == -1) {
             // setting the base timestamp of the whole h264 sequence
-            printf("h264 basets = %lld\n", _firstTS);
+            LOG("h264 basets = %lld\n", _firstTS);
             _baseTS = _firstTS;
         }
     }
@@ -432,15 +433,15 @@ void TSWriter::AddH264Data(const uint8_t *data, int length, H264FrameType ftype,
 void TSWriter::AddAACData(const uint8_t *data, int length, 
                           int samplerate, int channum, int64_t ts)
 {
-    printf("AddAACData length %d, ts %lld\n", length, ts);
+    LOG("AddAACData length %d, ts %lld\n", length, ts);
     
     if (_tsVideoNum == 0) {
-        printf("aacdata ignored by videonum == 0\n");
+        LOG("aacdata ignored by videonum == 0\n");
         return; // ignore
     }
     
     if (ts <_firstTS) {
-        printf("aacdata ignored by small firstts\n");
+        LOG("aacdata ignored by small firstts\n");
         return;
     }
     
