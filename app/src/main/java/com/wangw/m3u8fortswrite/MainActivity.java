@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements FrameCallback {
 
     public File getOutPutFile(){
         String path = "/sdcard/ABC";
-        String name = System.currentTimeMillis()+".mp4";
+        String name = System.currentTimeMillis()+".ts";
         return new File(path,name);
     }
 

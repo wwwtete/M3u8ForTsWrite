@@ -6,7 +6,7 @@
 #ifndef M3U8FORTSWRITE_LOG_H
 #define M3U8FORTSWRITE_LOG_H
 
-#define TAG "TSWRITE"
+#define TAG "KEYFRAME"
 
 #define LOG(...)    __android_log_print(ANDROID_LOG_DEBUG,TAG,__VA_ARGS__)
 

@@ -9,12 +9,12 @@ import java.io.RandomAccessFile;
  * Created by wangw on 2017/3/8.
  */
 
-public class FileWirte {
+public class TsFileWrite {
 
     private File mFile;
     private RandomAccessFile mAccessFile;
 
-    public FileWirte(File file) {
+    public TsFileWrite(File file) {
         mFile = file;
 
         try {
@@ -25,7 +25,7 @@ public class FileWirte {
     }
 
 
-    public void wirteData(byte[] data) throws IOException {
+    public void writeData(byte[] data) throws IOException {
         mAccessFile.seek(length());
         mAccessFile.write(data);
     }
@@ -37,6 +37,17 @@ public class FileWirte {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    public void finish(){
+        if (mAccessFile != null){
+            try {
+                mAccessFile.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 
 

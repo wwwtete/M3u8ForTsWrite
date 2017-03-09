@@ -12,6 +12,10 @@ import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 
+import com.wangw.m3u8fortswrite.TSFileBuffer;
+import com.wangw.m3u8fortswrite.TsFileWrite;
+import com.wangw.m3u8fortswrite.TsWirte;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -25,8 +29,8 @@ public class VideoRecordTask implements Runnable {
     //视频相关参数
     private static final String MIME_TYPE = "video/avc";
     private static final String AUDIO_MIME_TYPE = "audio/mp4a-latm";
-    private static final int FRAME_RATE = 24;
-    private static final int IFRAME_INTERVAL = 1;
+    private static final int FRAME_RATE = 30;
+    private static final int IFRAME_INTERVAL = 0;
     //音频相关参数
     private static final int A_SAMPLE_RATE = 44100;
     private static final int A_SAMPLES_PER_FRAME = 1024;
@@ -73,6 +77,8 @@ public class VideoRecordTask implements Runnable {
     private int mInverval;
     private long mLastTime;
 
+    private TSFileBuffer mTsBuffer = new TSFileBuffer();
+
     public VideoRecordTask(Context context,File file) {
         mContext = context;
         this.mOutputFile = file;
@@ -111,11 +117,11 @@ public class VideoRecordTask implements Runnable {
             synchronized (mVideoTrackInfo.muxerWrapper.sync){
                 drainEncoder(mVideoEncoder,mVideoBufferInfo,mVideoTrackInfo,tempAllStop);
             }
-            
+
             synchronized (mAudioTrackInfo.muxerWrapper.sync){
                 drainEncoder(mAudioEncoder,mAudioBufferInfo,mAudioTrackInfo,tempAllStop);
             }
-            
+
             long now = System.currentTimeMillis();
             if (!tempAllStop){
                 sendAudioToEncoder(false);
@@ -152,9 +158,16 @@ public class VideoRecordTask implements Runnable {
                 }else {
                     MediaFormat newFormat = encoder.getOutputFormat();
                     if (encoder == mVideoEncoder) {
+                        newFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL,IFRAME_INTERVAL);
                         mVideoOutputFormat = newFormat;
                         log("SPS -> "+mVideoOutputFormat.getByteBuffer("csd-0"));
                         log("PPS -> "+mVideoOutputFormat.getByteBuffer("csd-1"));
+                        byte[] sps = mVideoOutputFormat.getByteBuffer("csd-0").array();
+                        TsWirte.addH264Data(sps,sps.length,TsWirte.FRAMETYPE_SPS,getTs(),mTsBuffer);
+                        trackInfo.muxerWrapper.write(mTsBuffer.data);
+                        byte[] PPS = mVideoOutputFormat.getByteBuffer("csd-1").array();
+                        TsWirte.addH264Data(PPS,PPS.length,TsWirte.FRAMETYPE_PPS,getTs(),mTsBuffer);
+                        trackInfo.muxerWrapper.write(mTsBuffer.data);
                     }else if (encoder == mAudioEncoder) {
                         mAudioOutputFormat = newFormat;
                     }
@@ -182,7 +195,20 @@ public class VideoRecordTask implements Runnable {
 //                        outputBuffer.position(bufferInfo.offset);
 //                        outputBuffer.limit(bufferInfo.offset+bufferInfo.size);
                         log("合成器写入数据:"+getStr(encoder)+"| lenght="+outputBuffer.limit());
-                        muxerWrapper.mMuxer.writeSampleData(trackInfo.index,outputBuffer,bufferInfo);
+//                        muxerWrapper.mMuxer.writeSampleData(trackInfo.index,outputBuffer,bufferInfo);
+                        byte[] data = new byte[bufferInfo.size];
+                        outputBuffer.get(data);
+                        if (encoder == mVideoEncoder){
+                            boolean keyFrame = (bufferInfo.flags & MediaCodec.BUFFER_FLAG_KEY_FRAME) != 0;
+                            Log.d("KEYFRAME", "是否为关键帧: "+keyFrame+" length = "+data.length);
+                            Log.d("KEYFRAME2", "是否为关键帧: "+keyFrame+" 4 = "+data[4]);
+                            TsWirte.addH264Data(data,data.length,keyFrame ? TsWirte.FRAMETYPE_I : TsWirte.FRAMETYPE_P ,getTs(),mTsBuffer);
+                            trackInfo.muxerWrapper.write(mTsBuffer.data);
+                            Log.d("KEYFRAME", "输出length: "+mTsBuffer.length+" duration = "+mTsBuffer.duration);
+                        }else {
+                            TsWirte.addAACData(data,data.length,0,0,getTs());
+                        }
+
                     }
                 }
                 encoder.releaseOutputBuffer(encoderStatus,false);
@@ -241,7 +267,7 @@ public class VideoRecordTask implements Runnable {
 //        if (yuv == null){
 //            yuv = new byte[mWidth*mHeight*3/2];
 //        }
-        yuv = mConvertor.convert(mNowData);
+        yuv = mConvertor.convert(mNowData);//mNowData;//
         buffer.put(yuv);
         audioAbsolutePtsUs = (System.nanoTime())/1000L;
         if (endOfStream){
@@ -250,10 +276,21 @@ public class VideoRecordTask implements Runnable {
             eosSentToVideoEncoder = true;
         }else {
             log("喂入视频数据:"+yuv.length);
-            mVideoEncoder.queueInputBuffer(inputBufferIndex,0,yuv.length,audioAbsolutePtsUs,0);
+            mVideoEncoder.queueInputBuffer(inputBufferIndex,0,yuv.length,audioAbsolutePtsUs,MediaCodec.BUFFER_FLAG_KEY_FRAME);
         }
+    }
 
-
+    private long mLast = -1;
+    public long getTs(){
+        if (mLast == -1){
+            mLast = (System.nanoTime()/1000L);
+            return 0;
+        }else {
+            long now =  (System.nanoTime()/1000L);
+            long spacing = now - mLast;
+            mLast = now;
+            return spacing;
+        }
     }
 
     private void sendAudioToEncoder(boolean endOfStream) {
@@ -398,7 +435,8 @@ public class VideoRecordTask implements Runnable {
     }
 
     class MediaMuxerWrapper{
-        MediaMuxer mMuxer;
+        //        MediaMuxer mMuxer;
+        private TsFileWrite mWriter;
         final int TOTAL_NUM_TRACKS = 2;
         boolean started = false;
         int numTracksAdded = 0;
@@ -412,21 +450,22 @@ public class VideoRecordTask implements Runnable {
 
         private void restart(File file, int format) {
             onStop();
-            try {
-                mMuxer = new MediaMuxer(file.getAbsolutePath(),format);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            mWriter = new TsFileWrite(file);
+//            try {
+//                mMuxer = new MediaMuxer(file.getAbsolutePath(),format);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
 
         public int addTrack(MediaFormat format){
             numTracksAdded++;
-            int trackIndex = mMuxer.addTrack(format);
+//            int trackIndex = mMuxer.addTrack(format);
             if (allTracksAdded()){
-                mMuxer.start();
+//                mMuxer.start();
                 started = true;
             }
-            return trackIndex;
+            return numTracksAdded;
         }
 
         public void finishTrack(){
@@ -434,6 +473,19 @@ public class VideoRecordTask implements Runnable {
             if (allTacksFinished())
                 onStop();
 
+        }
+
+        public void write(byte[] data){
+            try {
+                if (data != null && data.length > 0)
+                    mWriter.writeData(data);
+                else {
+                    log("没有可写入的数据");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                log("写入数据失败");
+            }
         }
 
         public boolean allTracksAdded(){
@@ -446,15 +498,18 @@ public class VideoRecordTask implements Runnable {
 
 
         public void onStop() {
-            if (mMuxer == null)
+//            if (mMuxer == null)
+//                return;
+            if (mWriter == null)
                 return;
             if (!isStoped())
                 return;
             if (!started)
                 return;
             try {
-                mMuxer.release();
-                mMuxer = null;
+//                mMuxer.release();
+//                mMuxer = null;
+                mWriter.finish();
                 started = false;
                 numTracksAdded = 0;
                 numTracksFinished =0;

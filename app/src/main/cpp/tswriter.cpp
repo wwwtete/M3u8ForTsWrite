@@ -433,7 +433,7 @@ void TSWriter::AddH264Data(const uint8_t *data, int length, H264FrameType ftype,
 void TSWriter::AddAACData(const uint8_t *data, int length, 
                           int samplerate, int channum, int64_t ts)
 {
-    LOG("AddAACData length %d, ts %lld\n", length, ts);
+    LOG("addAACData length %d, ts %lld\n", length, ts);
     
     if (_tsVideoNum == 0) {
         LOG("aacdata ignored by videonum == 0\n");
