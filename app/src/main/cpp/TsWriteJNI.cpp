@@ -39,13 +39,12 @@ Java_com_wangw_m3u8fortswrite_TsWirte_addH264Data(JNIEnv *env, jclass type, jbyt
     TS.AddH264Data(inputBuffer,length,ft,ts,filebuffer);
 
     jclass objClass = env->GetObjectClass(outPutBuffer);
-
     jfieldID dataId = env->GetFieldID(objClass,"data","[B");
     jfieldID lengthId = env->GetFieldID(objClass,"length","I");
     jfieldID sizeId = env->GetFieldID(objClass,"size","I");
     jfieldID durationId = env->GetFieldID(objClass,"duration","J");
 
-    LOG("输出: length=%d | size=%d | duration=%d",filebuffer.ptr,filebuffer.size,filebuffer.duration);
+//    LOG("输出: length=%d | size=%d | duration=%d",filebuffer.ptr,filebuffer.size,filebuffer.duration);
 //    buffer.data = (uint8_t *) env->GetObjectField(outPutBuffer, dataId);
 //    buffer.ptr = env->GetIntField(outPutBuffer,lengthId);
 //    buffer.size = env->GetIntField(outPutBuffer,sizeId);

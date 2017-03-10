@@ -1,60 +1,45 @@
 package com.wangw.m3u8fortswrite;
 
-import android.os.Build;
+import android.content.Intent;
+import android.graphics.SurfaceTexture;
+import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import com.wangw.m3u8fortswrite.recod.CameraView;
-import com.wangw.m3u8fortswrite.recod.FrameCallback;
-import com.wangw.m3u8fortswrite.recod.VideoRecordTask;
-
 import java.io.File;
-@RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
-public class MainActivity extends AppCompatActivity implements FrameCallback {
 
+/**
+ * Created by wangw on 2017/3/9.
+ */
 
-    private Button mBtnRecode;
-    private CameraView mCameraView;
+public class MainActivity extends AppCompatActivity implements SurfaceTexture.OnFrameAvailableListener {
 
-    private VideoRecordTask mRecordTask;
-    private Thread mThread;
+    public static final String TAG="OPENGL";
+
+    static final int FILTER_NONE = 0;
+
+    private GLSurfaceView mGLView;
+    private Button mBtn;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mBtnRecode = (Button) findViewById(R.id.btn_recode);
-        mCameraView = (CameraView) findViewById(R.id.camerview);
+//        mGLView = (GLSurfaceView) findViewById(R.id.cameraPreview_surfaceView);
+        mBtn = (Button) findViewById(R.id.btn_recode);
 
 
     }
+
 
     public void onClick(View v){
-
-        if (recording()){
-            stopRecord();
-        }else {
-            startRecord();
-        }
-
+        startActivity(new Intent(this,CameraCaptureActivity.class));
     }
 
-    private boolean recording() {
-        return mRecordTask != null && !mRecordTask.isStoped();
-    }
-
-
-    private void startRecord() {
-        mBtnRecode.setText("STOP");
-        mCameraView.setCallback(this);
-        mRecordTask = new VideoRecordTask(this,getOutPutFile());
-        mThread = new Thread(mRecordTask);
-        mThread.start();
-    }
 
     public File getOutPutFile(){
         String path = "/sdcard/ABC";
@@ -62,15 +47,9 @@ public class MainActivity extends AppCompatActivity implements FrameCallback {
         return new File(path,name);
     }
 
-    private void stopRecord() {
-        mRecordTask.stop();
-        mBtnRecode.setText("StART");
+    @Override
+    public void onFrameAvailable(SurfaceTexture surfaceTexture) {
     }
 
-    @Override
-    public void onFrame(byte[] bytes, long time) {
-        if (recording()){
-            mRecordTask.feedData(bytes,time);
-        }
-    }
 }
+

@@ -450,7 +450,7 @@ public class VideoRecordTask implements Runnable {
 
         private void restart(File file, int format) {
             onStop();
-            mWriter = new TsFileWrite(file);
+//            mWriter = new TsFileWrite(file);
 //            try {
 //                mMuxer = new MediaMuxer(file.getAbsolutePath(),format);
 //            } catch (IOException e) {
@@ -476,16 +476,16 @@ public class VideoRecordTask implements Runnable {
         }
 
         public void write(byte[] data){
-            try {
-                if (data != null && data.length > 0)
-                    mWriter.writeData(data);
-                else {
-                    log("没有可写入的数据");
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                log("写入数据失败");
-            }
+//            try {
+//                if (data != null && data.length > 0)
+//                    mWriter.writeData(data);
+//                else {
+//                    log("没有可写入的数据");
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//                log("写入数据失败");
+//            }
         }
 
         public boolean allTracksAdded(){
