@@ -367,7 +367,7 @@ public class VideoEncoderCore implements Runnable {
             boolean keyFrame = (bufferInfo.flags & MediaCodec.BUFFER_FLAG_KEY_FRAME) != 0;
             Log.d("KEYFRAME", "是否为关键帧: "+keyFrame+" 4 = "+data[4]);
             TsWirte.addH264Data(data,data.length,keyFrame ? TsWirte.FRAMETYPE_I : TsWirte.FRAMETYPE_P ,getTs(),mTsBuffer);
-
+            mMuxerWrap.writeData(mTsBuffer);
         }else {
             byte[] data= new byte[bufferInfo.size+7];
             encodedData.get(data,7,bufferInfo.size);
@@ -494,7 +494,18 @@ public class VideoEncoderCore implements Runnable {
             }
             try {
                 Log.d("KEYFRAME", "写入数据: "+buffer.toString());
-                mTsFileWrite.writeData(buffer);
+               File file =mTsFileWrite.writeData(buffer);
+                //截取视频关键帧方法
+//                if (file != null){
+//                    MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+//                    mmr.setDataSource(file.getAbsolutePath());
+//                    Bitmap bmp  = mmr.getFrameAtTime(0);
+//                    File bmpF = new File("/sdcard/AAA/"+System.currentTimeMillis()+".png");
+//                    FileOutputStream ops = new FileOutputStream(bmpF);
+//                    bmp.compress(Bitmap.CompressFormat.PNG,80,ops);
+//                    ops.flush();
+//                    ops.close();
+//                }
             } catch (IOException e) {
                 log("写入异常");
                 e.printStackTrace();

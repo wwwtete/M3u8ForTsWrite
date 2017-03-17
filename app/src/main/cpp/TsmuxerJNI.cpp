@@ -1,9 +1,8 @@
 //
-// Created by wangw on 2017/3/7.
+// Created by wangw on 2017/3/10.
 //
 #include <jni.h>
 #include "Log.h"
-//#include <string.h>
 #include "tswriter.h"
 
 #ifdef __cplusplus
@@ -14,9 +13,9 @@ TSWriter TS;
 TSFileBuffer filebuffer;
 
 JNIEXPORT void JNICALL
-Java_com_wangw_m3u8fortswrite_TsWirte_addH264Data(JNIEnv *env, jclass type, jbyteArray inputBuffer_,
-                                                  jint length, jint frameType, jlong ts,
-                                                  jobject outPutBuffer) {
+Java_com_douyaim_qsapp_media_TsMuxer_addH264Data(JNIEnv *env, jclass type, jbyteArray inputBuffer_,
+                                                 jint length, jint frameType, jlong ts,
+                                                 jobject outPutBuffer) {
     uint8_t *inputBuffer = (uint8_t *) env->GetByteArrayElements(inputBuffer_, 0);
 
     TSWriter::H264FrameType ft;
@@ -57,28 +56,17 @@ Java_com_wangw_m3u8fortswrite_TsWirte_addH264Data(JNIEnv *env, jclass type, jbyt
     env->SetLongField(outPutBuffer,durationId,filebuffer.duration);
 
 
-
 //    env->ReleaseByteArrayElements(inputBuffer_, inputBuffer, 0);
 }
 
 JNIEXPORT void JNICALL
-Java_com_wangw_m3u8fortswrite_TsWirte_addAACData(JNIEnv *env, jclass type, jbyteArray inputBuffer_,
-                                                 jint length, jint samplerate, jint channum,
-                                                 jlong ts) {
+Java_com_douyaim_qsapp_media_TsMuxer_addAACData(JNIEnv *env, jclass type, jbyteArray inputBuffer_,
+                                                jint length, jint samplerate, jint channum,
+                                                jlong ts) {
     uint8_t *inputBuffer = (uint8_t *) env->GetByteArrayElements(inputBuffer_, 0);
     TS.AddAACData(samplerate,channum,inputBuffer,length,(int64_t)ts);
-
 //    env->ReleaseByteArrayElements(inputBuffer_, inputBuffer, 0);
 }
-
-JNIEXPORT jstring JNICALL
-Java_com_wangw_m3u8fortswrite_TsWirte_helloWord(JNIEnv *env, jclass type) {
-
-    return env->NewStringUTF("Hello From JNI");
-
-}
-
-
 
 #ifdef __cplusplus
 }

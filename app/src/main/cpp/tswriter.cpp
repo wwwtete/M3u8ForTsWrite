@@ -8,31 +8,30 @@
 
 #include <string>
 #include <assert.h>
-#include <stdio.h>
+#include <string>
 #include "tswriter.h"
-#include "Log.h"
 
 static uint8_t flv_mpegts_header[] = {
     
 #if 0
     /*  SDT */
-    0x47, 0x40, 0x11, 0x10, 0x00, 0x42, 0xF0, 0x25, 0x00, 0x01, 0xC1, 
-    0x00, 0x00, 0xFF, 0x01, 0xFF, 0x00, 0x01, 0xFC, 0x80, 0x14, 0x48, 
-    0x12, 0x01, 0x06, 0x46, 0x46, 0x6D, 0x70, 0x65, 0x67, 0x09, 0x53, 
-    0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x30, 0x31, 0x77, 0x7C, 0x43, 
-    0xCA, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
+    0x47, 0x40, 0x11, 0x10, 0x00, 0x42, 0xF0, 0x25, 0x00, 0x01, 0xC1,
+    0x00, 0x00, 0xFF, 0x01, 0xFF, 0x00, 0x01, 0xFC, 0x80, 0x14, 0x48,
+    0x12, 0x01, 0x06, 0x46, 0x46, 0x6D, 0x70, 0x65, 0x67, 0x09, 0x53,
+    0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x30, 0x31, 0x77, 0x7C, 0x43,
+    0xCA, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
     0xFF,
 #endif
     
@@ -65,7 +64,7 @@ static uint8_t flv_mpegts_header[] = {
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     
     /* PMT PID == 0x1001 */
-    /* TS */ 
+    /* TS */
     0x47, 0x50, 0x01, 0x10, 0x00,
     /* PSI */
     0x02, 0xb0, 0x1d, 0x00, 0x01, 0xc1, 0x00, 0x00,
@@ -110,7 +109,7 @@ struct str_buf_t {
 };
 
 /* 700 ms PCR delay */
-#define FLV_HLS_DELAY  63000
+#define FLV_HLS_DELAY  45000
 
 static void flv_mpegts_write_header(TSFileBuffer &fileBuffer)
 {
@@ -149,8 +148,7 @@ static uint8_t* flv_mpegts_write_pts(uint8_t *p, uint32_t fb, int64_t pts)
 
 int flv_mpegts_write_frame(TSFileBuffer &file, flv_mpegts_frame_t *f, str_buf_t *b, int64_t tsbase)
 {
-    LOG("flv_mpegts_write_frame pid %d payloadsize %d pts %lld tsbase %lld\n",
-           f->pid, (int)(b->last - b->pos), f->pts, tsbase);
+    //printf("flv_mpegts_write_frame pid %d payloadsize %d pts %lld tsbase %lld\n", f->pid, (int)(b->last - b->pos), f->pts, tsbase);
     
     f->pts = f->pts - tsbase + FLV_HLS_DELAY * 2;
     f->dts = f->dts - tsbase + FLV_HLS_DELAY * 2;
@@ -189,11 +187,11 @@ int flv_mpegts_write_frame(TSFileBuffer &file, flv_mpegts_frame_t *f, str_buf_t 
                 *p++ = 0x50; /* random access + PCR */
                 
                 // fix this, the file pcr start from 0 !!
-                LOG("writing pcr %lld\n", (f->dts - FLV_HLS_DELAY) * 300);
+               // printf("writing pcr %lld\n", (f->dts - FLV_HLS_DELAY) * 300);
                 p = flv_mpegts_write_pcr(p, (f->dts - FLV_HLS_DELAY) * 300);
                 
                 // in fact, the pcr can be set to 0 in all time, the only problem will be that VLC can't seek
-                //p = flv_mpegts_write_pcr(p, 0);
+                //p = flv_mpegts_write_pcr(p, 0);///jyf?
             }
             
             /* PES header */
@@ -235,7 +233,7 @@ int flv_mpegts_write_frame(TSFileBuffer &file, flv_mpegts_frame_t *f, str_buf_t 
         if (body_size <= in_size) {
             memcpy(p, b->pos, body_size);
             b->pos += body_size;
-        } 
+        }
         else {
             stuff_size = (body_size - in_size);
             
@@ -246,11 +244,13 @@ int flv_mpegts_write_frame(TSFileBuffer &file, flv_mpegts_frame_t *f, str_buf_t 
                 memset(base, 0xff, stuff_size);
                 packet[4] += (uint8_t)stuff_size;
                 
-            } 
+            }
             else {
                 /* no adaptation */
                 packet[3] |= 0x20;
-                p = (u_int8_t*)memmove((void*)(&packet[4] + stuff_size), (void*)&packet[4], p - &packet[4]);
+                int movecnt = (int)(p - &packet[4]);
+                memmove((void*)(&packet[4] + stuff_size), (void*)&packet[4], movecnt);
+                p = packet + 4 + stuff_size + movecnt;
                 packet[4] = (uint8_t) (stuff_size - 1);
                 if (stuff_size >= 2) {
                     packet[5] = 0;
@@ -270,7 +270,7 @@ int flv_mpegts_write_frame(TSFileBuffer &file, flv_mpegts_frame_t *f, str_buf_t 
     
     return 0;
 }
-
+static int g_count = 0;
 ///////////////////////////////
 TSWriter::TSWriter()
 {
@@ -283,33 +283,49 @@ TSWriter::TSWriter()
     _baseTS = -1;
     _aacCacheTS = 0;
     _aacCachePtr = 0;
+    
+    pthread_mutex_init(&m_mutex, NULL);
+    pthread_mutex_init(&m_mutex_audio, NULL);
+
+    g_count ++;
+    
+//    m_file = NULL;
+//    m_264file.clear();
 }
 
 TSWriter::~TSWriter()
 {
-    
+    pthread_mutex_destroy(&m_mutex);
+    pthread_mutex_destroy(&m_mutex_audio);
+
+//    if(m_file){
+//        fclose(m_file);
+//        m_file = NULL;
+//    }
 }
 
-void TSWriter::AddH264Data(const uint8_t *data, int length, H264FrameType ftype, 
-                                     int64_t ts, TSFileBuffer &tsfile)
+void TSWriter::AddH264Data(const uint8_t *data, int length, H264FrameType ftype,
+                           int64_t ts, TSFileBuffer &tsfile)
 {
-    LOG("AddH264Data ftype %d, length %d, ts %lld\n", ftype, length, ts);
+    pthread_mutex_lock(&m_mutex);
+    
     memset(&tsfile, 0, sizeof(tsfile));
     
     if (ftype == H264FrameType::SPS || ftype == H264FrameType::PPS) {
         // save them
         if (ftype == H264FrameType::SPS) {
-           assert(_sps == NULL);
+//            assert(_sps == NULL);
             _sps = new uint8_t[length];
             _spsLength = length;
             memcpy(_sps, data, length);
         }
         else {
-            assert(_pps == NULL);
+//            assert(_pps == NULL);
             _pps = new uint8_t[length];
             _ppsLength = length;
             memcpy(_pps, data, length);
         }
+        pthread_mutex_unlock(&m_mutex);
         return;
     }
     
@@ -324,7 +340,7 @@ void TSWriter::AddH264Data(const uint8_t *data, int length, H264FrameType ftype,
             framet.dts = (int64_t) _aacCacheTS * 90; // in 90KHz
             framet.pts = framet.dts;
             framet.pid = 0x101;
-            framet.sid = 0xe0; 
+            framet.sid = 0xc0;
             
             str_buf_t buf = { 0 };
             buf.pos = (uint8_t*)_aacCache;
@@ -353,12 +369,13 @@ void TSWriter::AddH264Data(const uint8_t *data, int length, H264FrameType ftype,
         
         if (_baseTS == -1) {
             // setting the base timestamp of the whole h264 sequence
-            LOG("h264 basets = %lld\n", _firstTS);
+            printf("h264 basets = %lld\n", _firstTS);
             _baseTS = _firstTS;
         }
     }
     else if (_tsVideoNum == 0) {
         // ignore the P frames before IDR
+        pthread_mutex_unlock(&m_mutex);
         return;
     }
     
@@ -396,7 +413,7 @@ void TSWriter::AddH264Data(const uint8_t *data, int length, H264FrameType ftype,
         framet.dts = (int64_t) ts * 90; // in 90KHz
         framet.pts = framet.dts;
         framet.pid = 0x100;
-        framet.sid = 0xe0; 
+        framet.sid = 0xe0;
         
         str_buf_t buf = { 0 };
         buf.pos = tmp;
@@ -418,7 +435,7 @@ void TSWriter::AddH264Data(const uint8_t *data, int length, H264FrameType ftype,
         framet.dts = (int64_t) ts * 90; // in 90KHz
         framet.pts = framet.dts;
         framet.pid = 0x100;
-        framet.sid = 0xe0; 
+        framet.sid = 0xe0;
         
         str_buf_t buf = { 0 };
         buf.pos = (uint8_t*)tmp;
@@ -428,26 +445,73 @@ void TSWriter::AddH264Data(const uint8_t *data, int length, H264FrameType ftype,
         _videoCC = framet.cc;
         delete[] tmp;
     }
+    pthread_mutex_unlock(&m_mutex);
 }
 
-void TSWriter::AddAACData(const uint8_t *data, int length, 
-                          int samplerate, int channum, int64_t ts)
+//
+static int SamplingFrequencyIndex[] = {
+    96000,
+    88200,
+    64000,
+    48000,
+    44100,
+    32000,
+    24000,
+    22050,
+    16000,
+    12000,
+    11025,
+    8000 ,
+    7350 ,
+    0    ,
+    0
+};
+
+int indexSampleRate(int index)
 {
-    LOG("addAACData length %d, ts %lld\n", length, ts);
+    int size = sizeof(SamplingFrequencyIndex)/sizeof(int);
+    if(index < 0 || index >= size){
+        return -1;
+    }
+    
+    return SamplingFrequencyIndex[index];
+}
+
+void TSWriter::AddAACData(unsigned int sampleRate, unsigned int channels, const uint8_t *data, int length, int64_t ts)
+{
+    pthread_mutex_lock(&m_mutex);
+//    printf("AddAACData length %d, ts %lld\n", length, ts);
     
     if (_tsVideoNum == 0) {
-        LOG("aacdata ignored by videonum == 0\n");
+//        printf("aacdata ignored by videonum == 0\n");
+        pthread_mutex_unlock(&m_mutex);
         return; // ignore
     }
     
     if (ts <_firstTS) {
-        LOG("aacdata ignored by small firstts\n");
+//        printf("aacdata ignored by small firstts\n");
+        pthread_mutex_unlock(&m_mutex);
         return;
     }
     
     if (ts > _lastTS) {
         _lastTS = ts;
     }
+    
+    
+    //    {
+    //        int adtsLength = 7;
+    //        unsigned int fullLength = adtsLength + length;
+    //        // fill in ADTS data
+    //        char adtsHead[7] = {0};
+    //        adtsHead[0] = (char)0xFF;	// 11111111  	= syncword
+    //        adtsHead[1] = (char)0xF9;	// 1111 1 00 1  = syncword MPEG-2 Layer CRC
+    //        adtsHead[2] = (char)(((profile-1)<<6) + (indexSampleRate(sampleRate)<<2) +(channels>>2));
+    //        adtsHead[3] = (char)(((channels&3)<<6) + (fullLength>>11));
+    //        adtsHead[4] = (char)((fullLength&0x7FF) >> 3);
+    //        adtsHead[5] = (char)(((fullLength&7)<<5) + 0x1F);
+    //        adtsHead[6] = (char)0xFC;
+    //    }
     
     if (_aacCachePtr == 0) {
         memcpy(_aacCache, data, length);
@@ -466,7 +530,7 @@ void TSWriter::AddAACData(const uint8_t *data, int length,
             framet.dts = (int64_t) _aacCacheTS * 90; // in 90KHz
             framet.pts = framet.dts;
             framet.pid = 0x101;
-            framet.sid = 0xe0; 
+            framet.sid = 0xc0;
             
             str_buf_t buf = { 0 };
             buf.pos = (uint8_t*)_aacCache;
@@ -477,11 +541,13 @@ void TSWriter::AddAACData(const uint8_t *data, int length,
             _aacCachePtr = 0;
             _tsAudioNum++;
         }
-    }    
+    }
+    pthread_mutex_unlock(&m_mutex);
 }
 
 void TSWriter::Close(TSFileBuffer &filebuffer)
 {
+    pthread_mutex_lock(&m_mutex);
     // flush the uncompleted ts file
     if (_aacCachePtr > 0) {
         flv_mpegts_frame_t framet;
@@ -490,7 +556,7 @@ void TSWriter::Close(TSFileBuffer &filebuffer)
         framet.dts = (int64_t) _aacCacheTS * 90; // in 90KHz
         framet.pts = framet.dts;
         framet.pid = 0x101;
-        framet.sid = 0xe0; 
+        framet.sid = 0xc0;
         
         str_buf_t buf = { 0 };
         buf.pos = (uint8_t*)_aacCache;
@@ -501,22 +567,63 @@ void TSWriter::Close(TSFileBuffer &filebuffer)
         _aacCachePtr = 0;
     }
     
-    filebuffer = _fileBuffer;
-    memset(&_fileBuffer, 0, sizeof(_fileBuffer));
-    
     if(_sps){
         delete [] _sps;
         _sps = NULL;
     }
+    _spsLength = 0;
     if(_pps){
         delete [] _pps;
         _pps = NULL;
     }
-    _spsLength = 0;
     _ppsLength = 0;
+    
+    if (_fileBuffer.data != NULL && _fileBuffer.ptr > 0) {
+        _fileBuffer.duration = _lastTS - _firstTS;
+    }
+    
+    filebuffer = _fileBuffer;
+    memset(&_fileBuffer, 0, sizeof(_fileBuffer));
+    pthread_mutex_unlock(&m_mutex);
+    
 }
 
 
+//void TSWriter::writeH264File(char * path, const uint8_t *data, int length)
+//{
+//        if(m_264file.empty()){
+//            if(path){
+//                char temp[200]{0};
+//                sprintf(temp, "%s/264_%d.264", path, g_count);
+//                m_264file = temp;
+//            }
+//        }
+//    
+//        if(! m_264file.empty()){
+//            if(m_file == NULL){
+//                m_file = fopen(m_264file.c_str(), "wb");
+//            }
+//        }
+//    
+//        if(m_file){
+//            fwrite(data, 1, length, m_file);
+//            fflush(m_file);
+//        }
+//    
+//        printf("AddH264Data 1111111111");
+    
+//}
 
+
+//void TSWriter::closeH264File()
+//{
+//        if(m_file){
+//            fflush(m_file);
+//            fclose(m_file);
+//            m_file = NULL;
+//        }
+//        m_264file.clear();
+
+//}
 
 

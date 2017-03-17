@@ -11,6 +11,8 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <pthread.h>
+#include <string>
 
 // a ts file content
 struct TSFileBuffer {
@@ -40,13 +42,19 @@ public:
     void AddH264Data(const uint8_t *data, int length, H264FrameType ftype, int64_t ts, TSFileBuffer &tsfile);
     
     // aac frame with adts header
-    void AddAACData(const uint8_t *data, int length, int samplerate, int channum, int64_t ts);
+    void AddAACData(unsigned int sampleRate, unsigned int channels, const uint8_t *data, int length, int64_t ts);
     
     void Close(TSFileBuffer &tsfile);
+    
+//    void writeH264File(char * path, const uint8_t *data, int length);
+//    void closeH264File();
+
     
 private:
     
     TSFileBuffer _fileBuffer;
+    pthread_mutex_t m_mutex;
+    pthread_mutex_t m_mutex_audio;
     
     uint8_t *_sps;
     uint8_t *_pps;
@@ -64,6 +72,9 @@ private:
     int64_t _aacCacheTS;
     uint8_t _aacCache[1024 * 1024];
     int _aacCachePtr;
+    
+//    std::string m_264file;
+//    FILE * m_file;
 };
 
 #endif /* tswriter_hpp */

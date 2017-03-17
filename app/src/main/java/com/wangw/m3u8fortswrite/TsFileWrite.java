@@ -36,9 +36,9 @@ public class TsFileWrite {
     }
 
 
-    public void writeData(TSFileBuffer buffer) throws IOException {
+    public File writeData(TSFileBuffer buffer) throws IOException {
         if (buffer.data == null || buffer.size <= 0){
-            return;
+            return null;
         }
 //        mAccessFile.seek(length());
 //        mAccessFile.write(data);
@@ -50,6 +50,7 @@ public class TsFileWrite {
         Extinfo extinfo = new Extinfo(getProxyUrl(file.getName()), buffer.getDuration());
         mM3u8Help.insert(extinfo);
         mIndex ++;
+        return file;
     }
 
     public String getProxyUrl(String tsFile) {
