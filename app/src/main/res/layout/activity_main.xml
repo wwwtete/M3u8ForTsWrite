@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
-    <!--<android.opengl.GLSurfaceView-->
-        <!--android:id="@+id/cameraPreview_surfaceView"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:layout_gravity="center" />-->
 
     <Button
         android:id="@+id/btn_recode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:onClick="onClick"
-        android:text="START"/>
+        android:text="RECORD"/>
 
-</RelativeLayout>
+    <Button
+        android:id="@+id/btn_change"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="onChange"
+        android:text="M3u8ToMp4"/>
+
+</LinearLayout>

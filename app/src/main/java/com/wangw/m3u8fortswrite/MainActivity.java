@@ -1,54 +1,78 @@
 package com.wangw.m3u8fortswrite;
 
-import android.content.Intent;
-import android.graphics.SurfaceTexture;
-import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import java.io.File;
+
+import tv.danmaku.ijk.media.player.ffmpeg.Mp4DescTools;
 
 /**
  * Created by wangw on 2017/3/9.
  */
 
-public class MainActivity extends AppCompatActivity implements SurfaceTexture.OnFrameAvailableListener {
+public class MainActivity extends AppCompatActivity  {
 
     public static final String TAG="OPENGL";
+    public static final String CACEHE_DIR = "/sdcard/ABC";
 
-    static final int FILTER_NONE = 0;
-
-    private GLSurfaceView mGLView;
     private Button mBtn;
+
+    private String mKey;
+    private boolean mChangeing;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        mGLView = (GLSurfaceView) findViewById(R.id.cameraPreview_surfaceView);
         mBtn = (Button) findViewById(R.id.btn_recode);
-
-
     }
 
 
     public void onClick(View v){
-        startActivity(new Intent(this,CameraCaptureActivity.class));
+        mKey = System.currentTimeMillis()+"";
+        CameraCaptureActivity.jumpTo(this,CACEHE_DIR,mKey);
     }
 
-
-    public File getOutPutFile(){
-        String path = "/sdcard/ABC";
-        String name = System.currentTimeMillis()+".ts";
-        return new File(path,name);
+    public void onChange(View v){
+        if (mChangeing){
+            Toast.makeText(this,"正在转换中",Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (TextUtils.isEmpty(mKey)){
+            Toast.makeText(this,"请先录制后再转换",Toast.LENGTH_LONG).show();
+        }else {
+            m3u8ToMp4(new File(CACEHE_DIR+File.separator+mKey,mKey+".m3u8"));
+        }
     }
 
-    @Override
-    public void onFrameAvailable(SurfaceTexture surfaceTexture) {
+    private void m3u8ToMp4(final File srcFile) {
+        if (!srcFile.exists()){
+            Toast.makeText(this,"m3u8文件不存在",Toast.LENGTH_LONG).show();
+            return;
+        }
+        mChangeing = true;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                File outputFile = new File(CACEHE_DIR,System.currentTimeMillis()+".m3u8");
+                final int result = Mp4DescTools.changem3u8Tomp4(srcFile.getAbsolutePath(),outputFile.getAbsolutePath());
+                mChangeing = false;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(MainActivity.this,"转换结束,转换结果 = "+result,Toast.LENGTH_LONG).show();
+                    }
+                });
+
+            }
+        }).start();
     }
 
 }

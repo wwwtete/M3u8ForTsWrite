@@ -17,6 +17,7 @@
 package com.wangw.m3u8fortswrite;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.opengl.EGL14;
@@ -123,6 +124,13 @@ public class CameraCaptureActivity extends Activity
     private static final String TAG = MainActivity.TAG;
     private static final boolean VERBOSE = false;
 
+    public static void jumpTo(Activity from,String cacheDir,String key){
+        Intent intent = new Intent(from,CameraCaptureActivity.class);
+        intent.putExtra("cacheDir",cacheDir);
+        intent.putExtra("key",key);
+        from.startActivity(intent);
+    }
+
     // Camera filters; must match up with cameraFilterNames in strings.xml
     static final int FILTER_NONE = 0;
     static final int FILTER_BLACK_WHITE = 1;
@@ -142,12 +150,15 @@ public class CameraCaptureActivity extends Activity
     // this is static so it survives activity restarts
     private static TextureMovieEncoder sVideoEncoder = new TextureMovieEncoder();
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera_capture);
 
-        File outputFile = new File("/sdcard/ABC/");//, System.currentTimeMillis()+".ts");//"camera-test.mp4");
+        String cacheDir = getIntent().getStringExtra("cacheDir");
+        String key = getIntent().getStringExtra("key");
+        File outputFile = new File(cacheDir);//, System.currentTimeMillis()+".ts");//"camera-test.mp4");
         TextView fileText = (TextView) findViewById(R.id.cameraOutputFile_text);
         fileText.setText(outputFile.toString());
 
@@ -170,7 +181,7 @@ public class CameraCaptureActivity extends Activity
         // appropriate EGL context.
         mGLView = (GLSurfaceView) findViewById(R.id.cameraPreview_surfaceView);
         mGLView.setEGLContextClientVersion(2);     // select GLES 2.0
-        mRenderer = new CameraSurfaceRenderer(mCameraHandler, sVideoEncoder, outputFile);
+        mRenderer = new CameraSurfaceRenderer(mCameraHandler, sVideoEncoder, outputFile,key);
         mGLView.setRenderer(mRenderer);
         mGLView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
@@ -453,6 +464,7 @@ class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
 
     private int mCurrentFilter;
     private int mNewFilter;
+    private String mKey;
 
 
     /**
@@ -463,10 +475,11 @@ class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
      * @param outputFile output file for encoded video; forwarded to movieEncoder
      */
     public CameraSurfaceRenderer(CameraCaptureActivity.CameraHandler cameraHandler,
-            TextureMovieEncoder movieEncoder, File outputFile) {
+            TextureMovieEncoder movieEncoder, File outputFile,String key) {
         mCameraHandler = cameraHandler;
         mVideoEncoder = movieEncoder;
         mOutputFile = outputFile;
+        mKey = key;
 
         mTextureId = -1;
 
@@ -651,7 +664,7 @@ class CameraSurfaceRenderer implements GLSurfaceView.Renderer {
                     Log.d(TAG, "START recording");
                     // start recording
                     mVideoEncoder.startRecording(new TextureMovieEncoder.EncoderConfig(
-                            mOutputFile, 640, 480, 1200 * 1024, EGL14.eglGetCurrentContext(),"ts-"+System.currentTimeMillis()));
+                            mOutputFile, 640, 480, 1200 * 1024, EGL14.eglGetCurrentContext(),mKey));
                     mRecordingStatus = RECORDING_ON;
                     break;
                 case RECORDING_RESUMED:
