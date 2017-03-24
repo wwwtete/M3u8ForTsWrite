@@ -20,4 +20,6 @@ public class TsMuxer {
     public native static void addH264Data(byte[] inputBuffer,int length,int frameType,long ts,TSFileBuffer outPutBuffer);
 
     public native static void addAACData(byte[] inputBuffer, int length, int samplerate, int channum, long ts);
+
+    public native static void close(TSFileBuffer outputBuffer);
 }

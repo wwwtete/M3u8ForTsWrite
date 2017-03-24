@@ -172,24 +172,45 @@ public class VideoEncoderCore implements Runnable {
     @Override
     public void run() {
         boolean endOfStream;
-        mAudioRecord.startRecording();
-        while (true){
-            if (!mHasData){
-                continue;
-            }
-            endOfStream = !mRuning;
-            if (endOfStream){
-                sendAudioToEncoder(endOfStream);
-            }
+        try {
+            mAudioRecord.startRecording();
+            while (true) {
+                if (!mHasData) {
+                    continue;
+                }
+                endOfStream = !mRuning;
+                if (endOfStream) {
+                    sendAudioToEncoder(endOfStream);
+                }
 
-            drainEncoder(mVideoEncoder,mVideoTrack,mVideoBufferInfo,endOfStream);
-            drainEncoder(mAudioEncoder,mAudioTrack,mAudioBufferInfo,endOfStream);
+                drainEncoder(mVideoEncoder, mVideoTrack, mVideoBufferInfo, endOfStream);
+                drainEncoder(mAudioEncoder, mAudioTrack, mAudioBufferInfo, endOfStream);
 
-            if (!endOfStream){
-                sendAudioToEncoder(endOfStream);
-            }else {
-                break;
+                if (!endOfStream) {
+                    sendAudioToEncoder(endOfStream);
+                } else {
+                    break;
+                }
             }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            onRelease();
+        }
+    }
+
+    private void onRelease() {
+        if (mAudioRecord != null) {
+            mAudioRecord.stop();
+            mAudioRecord.release();
+        }
+        if (mVideoEncoder != null) {
+            mVideoEncoder.stop();
+            mVideoEncoder.release();
+        }
+        if (mAudioEncoder != null) {
+            mAudioEncoder.stop();
+            mAudioEncoder.release();
         }
     }
 
@@ -480,6 +501,8 @@ public class VideoEncoderCore implements Runnable {
             if (mTsFileWrite == null || !allFinish() || !started)
                 return;
 
+            TsWirte.close(mTsBuffer);
+            writeData(mTsBuffer);
             mTsFileWrite.finish();
             mTsFileWrite = null;
             started = false;

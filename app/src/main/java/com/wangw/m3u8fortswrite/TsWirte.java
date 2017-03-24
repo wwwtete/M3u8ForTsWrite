@@ -21,5 +21,5 @@ public class TsWirte {
 
     public native static void addAACData(byte[] inputBuffer, int length, int samplerate, int channum, long ts);
 
-
+    public native static void close(TSFileBuffer outputBuffer);
 }

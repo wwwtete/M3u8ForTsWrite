@@ -78,6 +78,30 @@ Java_com_wangw_m3u8fortswrite_TsWirte_helloWord(JNIEnv *env, jclass type) {
 
 }
 
+JNIEXPORT void JNICALL
+Java_com_wangw_m3u8fortswrite_TsWirte_close(JNIEnv *env, jclass type, jobject outputBuffer) {
+
+    TS.Close(filebuffer);
+    jclass objClass = env->GetObjectClass(outputBuffer);
+    jfieldID dataId = env->GetFieldID(objClass,"data","[B");
+    jfieldID lengthId = env->GetFieldID(objClass,"length","I");
+    jfieldID sizeId = env->GetFieldID(objClass,"size","I");
+    jfieldID durationId = env->GetFieldID(objClass,"duration","J");
+
+//    LOG("输出: length=%d | size=%d | duration=%d",filebuffer.ptr,filebuffer.size,filebuffer.duration);
+//    buffer.data = (uint8_t *) env->GetObjectField(outPutBuffer, dataId);
+//    buffer.ptr = env->GetIntField(outPutBuffer,lengthId);
+//    buffer.size = env->GetIntField(outPutBuffer,sizeId);
+//    buffer.duration = env->GetLongField(outPutBuffer,durationId);
+    jbyteArray array = env->NewByteArray(filebuffer.ptr);
+    env->SetByteArrayRegion(array, 0, filebuffer.ptr, (const jbyte *) filebuffer.data);
+    env->SetObjectField(outputBuffer, dataId, (jobject) array);
+    env->SetIntField(outputBuffer,lengthId,filebuffer.ptr);
+    env->SetIntField(outputBuffer,sizeId,filebuffer.size);
+    env->SetLongField(outputBuffer,durationId,filebuffer.duration);
+
+}
+
 
 
 #ifdef __cplusplus
