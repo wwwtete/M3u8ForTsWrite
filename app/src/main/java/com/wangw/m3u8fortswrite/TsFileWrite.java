@@ -3,9 +3,6 @@ package com.wangw.m3u8fortswrite;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Locale;
 
 /**
  * Created by wangw on 2017/3/8.
@@ -54,12 +51,13 @@ public class TsFileWrite {
     }
 
     public String getProxyUrl(String tsFile) {
-        try {
-            return String.format(Locale.US, "%s?server=%s", tsFile, URLEncoder.encode("www.test.com","utf-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return null;
+//        try {
+//            return String.format(Locale.US, "%s?server=%s", tsFile, URLEncoder.encode("www.test.com","utf-8"));
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+        return tsFile;
     }
 
 //    public long length(){

@@ -4,12 +4,15 @@ android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
     defaultConfig {
-        applicationId "com.wangw.github.m3u8fortswrite"
+        applicationId "com.wangw.m3u8fortswrite"
         minSdkVersion 18
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters 'armeabi-v7a'
+        }
     }
     buildTypes {
         release {
@@ -28,11 +31,12 @@ android {
             jniLibs.srcDirs = ['libs']
         }
     }
+}
 
-    repositories {
-        flatDir {
-            dirs 'libs'
-        }
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs 'libs' /**在libs文件夹下找aar文件*/
     }
 }
 
